@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playlist Favoritas | Mi Música</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+:root {
+    --fondo: #080808;
+    --panel: #191919;
+    --verde: #1ed760;
+    --texto: #ffffff;
+    --gris: #b3b3b3;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+a { text-decoration: none; color: inherit; }
+
+.navbar {
+    background: #080808;
+    padding: 13px 22px;
+    border-bottom: 1px solid #292929;
+}
+
+.logo {
+    color: var(--verde);
+    font-size: 23px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.logo:hover { color: var(--verde); }
+
+.btn-verde {
+    background: var(--verde);
+    color: #000;
+    border: 0;
+    border-radius: 25px;
+    padding: 10px 19px;
+    font-weight: bold;
+}
+
+.btn-verde:hover {
+    background: #70ed96;
+    color: #000;
+}
+
+.estructura {
+    display: grid;
+    grid-template-columns: 225px minmax(0, 1fr);
+    gap: 9px;
+    padding: 9px;
+    min-height: calc(100vh - 60px);
+}
+
+.sidebar {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 20px 13px;
+}
+
+.sidebar h5 {
+    color: var(--verde);
+    font-weight: bold;
+    margin-bottom: 22px;
+}
+
+.menu-lateral {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-enlace {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 7px;
+    color: var(--gris);
+    margin-bottom: 4px;
+    transition: .2s;
+}
+
+.menu-enlace:hover,
+.menu-enlace.activo {
+    color: white;
+    background: #303030;
+}
+
+.menu-enlace i {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+}
+
+.sidebar hr { border-color: #444; }
+
+.biblioteca p {
+    color: #ddd;
+    font-size: 14px;
+}
+
+main {
+    min-width: 0;
+    border-radius: 10px;
+    padding: 26px 25px 130px;
+    background: linear-gradient(180deg, #263c31 0, #191919 340px);
+    min-height: calc(100vh - 80px);
+}
+
+.seccion-pagina { display: none; }
+
+.seccion-pagina#inicio {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(8, 8, 8, 0.82) 0%,
+            rgba(8, 8, 8, 0.58) 50%,
+            rgba(8, 8, 8, 0.20) 100%
+        ),
+        url("https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=2000&q=90");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 12px;
+    min-height: calc(100vh - 150px);
+    padding: 28px;
+}
+
+.seccion-pagina.activa {
+    display: block;
+    animation: aparecer .25s ease;
+}
+
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.saludo {
+    color: var(--gris);
+    font-size: 13px;
+    letter-spacing: 2px;
+}
+
+.titulo-principal {
+    font-size: clamp(34px, 4.5vw, 56px);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    margin: 7px 0;
+}
+
+.subtitulo { color: var(--gris); }
+
+.seccion-titulo {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 12px 0 18px;
+}
+
+.inicio-contenido { padding: 30px 0; }
+.inicio-contenido .titulo-principal { margin-top: 15px; }
+
+.inicio-descripcion {
+    max-width: 550px;
+    color: #ddd;
+    line-height: 1.7;
+    margin: 18px 0 25px;
+}
+
+.inicio-icono {
+    font-size: 75px;
+    color: var(--verde);
+    margin-bottom: 15px;
+}
+
+/* TARJETAS DE ARTISTAS */
+.tarjeta-artista {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    background: #202020;
+    border: 2px solid var(--color-artista);
+    border-radius: 13px;
+    padding: 13px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    transition: transform .2s, background .2s, box-shadow .2s;
+    cursor: pointer;
+}
+
+.tarjeta-artista:hover {
+    background: #292929;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px #0008;
+}
+
+.tarjeta-artista.seleccionada {
+    box-shadow: 0 0 0 2px var(--color-artista), 0 0 20px #ffffff20;
+}
+
+.foto-artista {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 8px;
+    background: #333;
+}
+
+.nombre-artista {
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 800;
+    min-height: 47px;
+    display: flex;
+    align-items: center;
+    margin: 10px 0 3px;
+    overflow-wrap: anywhere;
+}
+
+.genero-artista {
+    color: var(--gris);
+    font-size: 13px;
+    min-height: 36px;
+    margin: 0 0 8px;
+}
+
+.canciones-resumen {
+    font-size: 12px;
+    color: #ddd;
+    min-height: 36px;
+    margin-bottom: 12px;
+}
+
+.boton-artista {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--verde);
+    color: #000;
+    font-size: 22px;
+    margin-top: auto;
+    align-self: flex-end;
+}
+
+.boton-artista:hover { transform: scale(1.06); }
+
+.junior { --color-artista: #3485d9; }
+.fuerza { --color-artista: #800020; }
+.canserbero { --color-artista: #b9b9b9; }
+.virlan { --color-artista: #32835e; }
+
+/* BUSCADOR */
+.buscador {
+    background: white;
+    color: #111;
+    border: 0;
+    border-radius: 30px;
+    padding: 11px 18px;
+    width: 100%;
+}
+
+.buscador:focus {
+    outline: 2px solid var(--verde);
+    box-shadow: none;
+}
+
+/* REPRODUCTOR DE SPOTIFY */
+.reproductor-youtube {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 25px;
+    padding: 15px;
+    background: #101010;
+    border: 1px solid #333;
+    border-radius: 14px;
+    box-shadow: 0 8px 28px #0005;
+}
+
+.reproductor-youtube[hidden] {
+    display: none !important;
+}
+
+.youtube-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.youtube-icono {
+    color: var(--verde);
+    font-size: 27px;
+}
+
+.youtube-titulo {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.youtube-subtitulo {
+    font-size: 12px;
+    color: var(--gris);
+    margin: 3px 0 0;
+}
+
+.video-contenedor {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 9px;
+    background: #000;
+}
+
+.video-contenedor iframe {
+    width: 100%;
+    height: 152px;
+    border: 0;
+    display: block;
+}
+
+/* LISTA DE CANCIONES */
+.lista-canciones {
+    background: #10101070;
+    border-radius: 10px;
+    padding: 9px 15px;
+}
+
+.cancion {
+    display: grid;
+    grid-template-columns: 28px 52px minmax(0, 1fr) 38px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 6px;
+    border-bottom: 1px solid #333;
+    border-radius: 4px;
+    transition: background .2s;
+}
+
+.cancion:last-child { border-bottom: 0; }
+.cancion[hidden] { display: none !important; }
+
+.numero {
+    color: var(--gris);
+    text-align: center;
+}
+
+.portada-cancion {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 5px;
+    background: #292929;
+    display: block;
+}
+
+.nombre-cancion {
+    font-size: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.artista-cancion {
+    color: var(--gris);
+    font-size: 13px;
+}
+
+.boton-cancion {
+    background: transparent;
+    color: #ddd;
+    border: 0;
+    font-size: 23px;
+}
+
+.boton-cancion:hover,
+.boton-cancion.seleccionada { color: var(--verde); }
+
+.filtro-artista { border-radius: 20px; }
+
+.filtro-artista.active {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #000;
+}
+
+.sin-resultados {
+    color: var(--gris);
+    text-align: center;
+    padding: 25px 10px;
+}
+
+/* CONTACTO */
+.contacto {
+    padding: 22px;
+    border-radius: 10px;
+    background: #202020;
+    max-width: 750px;
+}
+
+.contacto label { margin: 10px 0 5px; }
+
+.contacto input,
+.contacto textarea {
+    background: #303030;
+    border: 1px solid #555;
+    color: white;
+}
+
+.contacto input::placeholder,
+.contacto textarea::placeholder { color: #aaa; }
+
+.contacto input:focus,
+.contacto textarea:focus {
+    background: #303030;
+    color: white;
+    border-color: var(--verde);
+    box-shadow: none;
+}
+
+/* PIE DE PÁGINA */
+footer {
+    text-align: center;
+    color: var(--gris);
+    font-size: 12px;
+    padding: 25px 0 5px;
+}
+
+/* REPRODUCTOR INFERIOR */
+.reproductor {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    min-height: 82px;
+    background: #080808;
+    border-top: 1px solid #333;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+}
+
+.actual {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.mini-portada {
+    width: 49px;
+    height: 49px;
+    object-fit: cover;
+    border-radius: 5px;
+    background: #292929;
+}
+
+.actual-texto { min-width: 0; }
+
+.actual-texto strong,
+.actual-texto small {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.actual-texto small { color: var(--gris); }
+
+.controles { text-align: center; }
+
+.controles button {
+    background: transparent;
+    border: 0;
+    color: white;
+    font-size: 19px;
+    margin: 0 5px;
+}
+
+.controles .principal {
+    background: white;
+    color: black;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.progreso-fila {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: var(--gris);
+    font-size: 11px;
+}
+
+.barra-progreso { width: min(100%, 370px); }
+input[type="range"] { accent-color: var(--verde); }
+
+.volumen {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.volumen input { width: 100px; }
+
+/* RESPONSIVE */
+@media (max-width: 850px) {
+    .estructura { grid-template-columns: 1fr; }
+    .sidebar { padding: 10px; }
+
+    .sidebar h5,
+    .sidebar hr,
+    .biblioteca { display: none; }
+
+    .menu-lateral {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .menu-enlace {
+        padding: 8px;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    main { padding: 18px 16px 130px; }
+
+    .reproductor {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .volumen { display: none; }
+}
+
+@media (max-width: 480px) {
+    .navbar { padding: 10px; }
+    .logo { font-size: 18px; }
+    main { padding: 14px 10px 130px; }
+    .tarjeta-artista { padding: 8px; }
+
+    .nombre-artista {
+        font-size: 15px;
+        min-height: 40px;
+    }
+
+    .genero-artista { font-size: 11px; }
+    .canciones-resumen { font-size: 11px; }
+
+    .cancion {
+        grid-template-columns: 20px 42px minmax(0, 1fr) 30px;
+        gap: 8px;
+        padding: 10px 0;
+    }
+
+    .portada-cancion {
+        width: 42px;
+        height: 42px;
+    }
+
+    .nombre-cancion { font-size: 13px; }
+    .artista-cancion { font-size: 11px; }
+
+    .reproductor { padding: 8px; }
+
+    .mini-portada {
+        width: 38px;
+        height: 38px;
+    }
+
+    .actual-texto strong { font-size: 11px; }
+    .actual-texto small { font-size: 10px; }
+
+    .controles button { margin: 0 2px; }
+    .progreso-fila { gap: 4px; }
+    .contacto { padding: 15px; }
+
+    .reproductor-youtube { padding: 10px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- BARRA SUPERIOR -->
+<nav class="navbar">
+    <div class="container-fluid d-flex align-items-center">
+        <a href="#inicio" class="logo" data-seccion="inicio">
+            <i class="bi bi-music-note-beamed"></i> Playlist
+        </a>
+    </div>
+</nav>
+
+<div class="estructura">
+
+<!-- MENÚ LATERAL -->
+<aside class="sidebar">
+    <h5><i class="bi bi-collection-play"></i> Mi biblioteca</h5>
+
+    <nav class="menu-lateral" aria-label="Navegación principal">
+        <a href="#inicio" class="menu-enlace activo" data-seccion="inicio">
+            <i class="bi bi-house-door-fill"></i> Inicio
+        </a>
+
+        <a href="#artistas" class="menu-enlace" data-seccion="artistas">
+            <i class="bi bi-mic-fill"></i> Artistas
+        </a>
+
+        <a href="#canciones" class="menu-enlace" data-seccion="canciones">
+            <i class="bi bi-music-note-list"></i> Canciones
+        </a>
+
+        <a href="#contacto" class="menu-enlace" data-seccion="contacto">
+            <i class="bi bi-envelope-fill"></i> Contacto
+        </a>
+    </nav>
+
+    <hr>
+
+    <div class="biblioteca">
+        <p class="text-secondary small">TU PLAYLIST</p>
+        <p><i class="bi bi-disc"></i> Mi música</p>
+        <p><i class="bi bi-headphones"></i> Para escuchar</p>
+        <p><i class="bi bi-clock-history"></i> Reproducidas</p>
+    </div>
+</aside>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main>
+
+<!-- INICIO -->
+<section id="inicio" class="seccion-pagina activa">
+    <div class="inicio-contenido">
+        <i class="bi bi-music-note-list inicio-icono"></i>
+        <p class="saludo">TU ESPACIO MUSICAL</p>
+        <h1 class="titulo-principal">Playlist Favoritas</h1>
+        <p class="subtitulo">Tus artistas, tus canciones y tu propio ritmo.</p>
+
+        <p class="inicio-descripcion">
+            Bienvenido a tu espacio musical. Aquí puedes descubrir
+            tus artistas favoritos, consultar sus canciones y
+            disfrutar de una página inspirada en tu estilo musical.
+        </p>
+
+        <button type="button" class="btn btn-verde"
+                onclick="mostrarSeccion('artistas')">
+            <i class="bi bi-play-fill"></i> Explorar música
+        </button>
+    </div>
+
+    <footer>Hecho con música y buen gusto · Playlist Favoritas</footer>
+</section>
+
+<!-- ARTISTAS -->
+<section id="artistas" class="seccion-pagina">
+    <h2 class="seccion-titulo">Tus artistas favoritos</h2>
+    <p class="text-secondary mb-4">
+        Selecciona un artista para consultar sus canciones.
+    </p>
+
+    <div class="row g-3">
+
+        <div class="col-6 col-xl-3 d-flex">
+            <article class="tarjeta-artista junior"
+                     data-artista="Junior H" tabindex="0" role="button"
+                     aria-label="Ver canciones de Junior H">
+                <img class="foto-artista"
+                     src="https://periodicocorreo.com.mx/core/correo/assets/images/2025/09/03/junior-h-cr-courtesy-of-rancho-humilde-press-2024-billboard-1548-myLSV3RJP.jpg"
+                     alt="Fotografía de Junior H" loading="lazy">
+                <h3 class="nombre-artista">Junior H</h3>
+                <p class="genero-artista">Corridos tumbados</p>
+                <p class="canciones-resumen">Suena · Las Noches</p>
+                <button type="button" class="boton-artista"
+                        aria-label="Ver canciones de Junior H">
+                    <i class="bi bi-play-fill"></i>
+                </button>
+            </article>
+        </div>
+
+        <div class="col-6 col-xl-3 d-flex">
+            <article class="tarjeta-artista fuerza"
+                     data-artista="Fuerza Regida" tabindex="0" role="button"
+                     aria-label="Ver canciones de Fuerza Regida">
+                <img class="foto-artista"
+                     src="https://s.yimg.com/os/es/animal_pol_tico_619/e2cc3981da6149646a49cf649599e982"
+                     alt="Fotografía de Fuerza Regida" loading="lazy">
+                <h3 class="nombre-artista">Fuerza Regida</h3>
+                <p class="genero-artista">Regional mexicano</p>
+                <p class="canciones-resumen">Chavalitas · Chaka</p>
+                <button type="button" class="boton-artista"
+                        aria-label="Ver canciones de Fuerza Regida">
+                    <i class="bi bi-play-fill"></i>
+                </button>
+            </article>
+        </div>
+
+        <div class="col-6 col-xl-3 d-flex">
+            <article class="tarjeta-artista canserbero"
+                     data-artista="Canserbero" tabindex="0" role="button"
+                     aria-label="Ver canciones de Canserbero">
+                <img class="foto-artista"
+                     src="https://www.nacion.com/resizer/v2/IP75VYY3ABGWDHLIZ6ZDM7WPRI.jpeg?auth=70bc66f86a7b65119e8b69002cf1df2046ebaee2c344691b504c4c0a8380d414&height=1069&smart=true&width=1066"
+                     alt="Fotografía de Canserbero" loading="lazy">
+                <h3 class="nombre-artista">Canserbero</h3>
+                <p class="genero-artista">Rap y hip-hop</p>
+                <p class="canciones-resumen">Querer querernos · Maquiavélico</p>
+                <button type="button" class="boton-artista"
+                        aria-label="Ver canciones de Canserbero">
+                    <i class="bi bi-play-fill"></i>
+                </button>
+            </article>
+        </div>
+
+        <div class="col-6 col-xl-3 d-flex">
+            <article class="tarjeta-artista virlan"
+                     data-artista="Virlan García" tabindex="0" role="button"
+                     aria-label="Ver canciones de Virlán García">
+                <img class="foto-artista"
+                     src="https://blob.expreso.com.mx/images/uploads/2021/02/virlan-garcia.jpg"
+                     alt="Fotografía de Virlán García" loading="lazy">
+                <h3 class="nombre-artista">Virlán García</h3>
+                <p class="genero-artista">Regional mexicano</p>
+                <p class="canciones-resumen">A lo que voy · Sientes lo que siento</p>
+                <button type="button" class="boton-artista"
+                        aria-label="Ver canciones de Virlán García">
+                    <i class="bi bi-play-fill"></i>
+                </button>
+            </article>
+        </div>
+
+    </div>
+
+    <footer>Hecho con música y buen gusto · Playlist Favoritas</footer>
+</section>
+
+<!-- CANCIONES -->
+<section id="canciones" class="seccion-pagina">
+    <h2 class="seccion-titulo" id="tituloLista">Todas las canciones favoritas</h2>
+
+    <!-- REPRODUCTOR DE SPOTIFY: CAMBIA SEGÚN LA CANCIÓN -->
+    <div id="reproductorYouTube" class="reproductor-youtube" hidden>
+        <div class="youtube-encabezado">
+            <i class="bi bi-spotify youtube-icono"></i>
+            <div>
+                <p class="youtube-titulo" id="spotifyTitulo">Suena</p>
+                <p class="youtube-subtitulo" id="spotifySubtitulo">
+                    Junior H y José Mejía · Spotify
+                </p>
+            </div>
+        </div>
+
+        <div class="video-contenedor">
+            <iframe
+                id="spotifyPlayer"
+                src="https://open.spotify.com/embed/track/68x2TVlhCCwwBmszzLeCcQ?utm_source=generator"
+                title="Reproductor de Spotify"
+                width="100%"
+                height="152"
+                style="border: 0;"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy">
+            </iframe>
+        </div>
+    </div>
+
+    <form id="formBuscar" class="mb-4" role="search">
+        <input type="search" id="buscar" class="buscador"
+               placeholder="¿Qué canción o artista buscas?"
+               aria-label="Buscar canciones o artistas">
+    </form>
+
+    <div class="d-flex gap-2 flex-wrap mb-3">
+        <button type="button" class="btn btn-sm btn-outline-light filtro-artista active"
+                data-filtro="Todos">Todas</button>
+        <button type="button" class="btn btn-sm btn-outline-light filtro-artista"
+                data-filtro="Junior H">Junior H</button>
+        <button type="button" class="btn btn-sm btn-outline-light filtro-artista"
+                data-filtro="Fuerza Regida">Fuerza Regida</button>
+        <button type="button" class="btn btn-sm btn-outline-light filtro-artista"
+                data-filtro="Canserbero">Canserbero</button>
+        <button type="button" class="btn btn-sm btn-outline-light filtro-artista"
+                data-filtro="Virlan García">Virlán García</button>
+    </div>
+
+    <div class="lista-canciones" id="listaCanciones">
+
+        <div class="cancion" data-titulo="Suena" data-artista="Junior H">
+            <span class="numero">1</span>
+            <img class="portada-cancion"
+                 src="https://periodicocorreo.com.mx/core/correo/assets/images/2025/09/03/junior-h-cr-courtesy-of-rancho-humilde-press-2024-billboard-1548-myLSV3RJP.jpg"
+                 alt="Portada de Suena" loading="lazy">
+            <div>
+                <div class="nombre-cancion">Suena</div>
+                <div class="artista-cancion">Junior H y José Mejía</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Reproducir Suena">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <div class="cancion" data-titulo="Las Noches" data-artista="Junior H">
+            <span class="numero">2</span>
+            <img class="portada-cancion"
+                 src="https://periodicocorreo.com.mx/core/correo/assets/images/2025/09/03/junior-h-cr-courtesy-of-rancho-humilde-press-2024-billboard-1548-myLSV3RJP.jpg"
+                 alt="Portada de Las Noches" loading="lazy">
+            <div>
+                <div class="nombre-cancion">Las Noches</div>
+                <div class="artista-cancion">Junior H</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Seleccionar Las Noches">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <div class="cancion" data-titulo="Chavalitas" data-artista="Fuerza Regida">
+            <span class="numero">3</span>
+            <img class="portada-cancion"
+                 src="https://s.yimg.com/os/es/animal_pol_tico_619/e2cc3981da6149646a49cf649599e982"
+                 alt="Portada de Chavalitas" loading="lazy">
+            <div>
+                <div class="nombre-cancion">Chavalitas</div>
+                <div class="artista-cancion">Fuerza Regida</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Seleccionar Chavalitas">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <div class="cancion" data-titulo="Chaka" data-artista="Fuerza Regida">
+            <span class="numero">4</span>
+            <img class="portada-cancion"
+                 src="https://s.yimg.com/os/es/animal_pol_tico_619/e2cc3981da6149646a49cf649599e982"
+                 alt="Portada de Chaka" loading="lazy">
+            <div>
+                <div class="nombre-cancion">Chaka</div>
+                <div class="artista-cancion">Fuerza Regida</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Seleccionar Chaka">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <div class="cancion" data-titulo="Querer querernos" data-artista="Canserbero">
+            <span class="numero">5</span>
+            <img class="portada-cancion"
+                 src="https://www.nacion.com/resizer/v2/IP75VYY3ABGWDHLIZ6ZDM7WPRI.jpeg?auth=70bc66f86a7b65119e8b69002cf1df2046ebaee2c344691b504c4c0a8380d414&height=1069&smart=true&width=1066"
+                 alt="Portada de Querer querernos" loading="lazy">
+            <div>
+                <div class="nombre-cancion">Querer querernos</div>
+                <div class="artista-cancion">Canserbero</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Seleccionar Querer querernos">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <div class="cancion" data-titulo="Sientes lo que siento" data-artista="Virlan García">
+            <span class="numero">6</span>
+            <img class="portada-cancion"
+                 src="https://blob.expreso.com.mx/images/uploads/2021/02/virlan-garcia.jpg"
+                 alt="Portada de Sientes lo que siento" loading="lazy">
+            <div>
+                <div class="nombre-cancion">Sientes lo que siento</div>
+                <div class="artista-cancion">Virlán García</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Seleccionar Sientes lo que siento">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <div class="cancion" data-titulo="Maquiavélico" data-artista="Canserbero">
+            <span class="numero">7</span>
+            <img class="portada-cancion"
+                 src="https://www.nacion.com/resizer/v2/IP75VYY3ABGWDHLIZ6ZDM7WPRI.jpeg?auth=70bc66f86a7b65119e8b69002cf1df2046ebaee2c344691b504c4c0a8380d414&height=1069&smart=true&width=1066"
+                 alt="Portada de Maquiavélico" loading="lazy">
+            <div>
+                <div class="nombre-cancion">Maquiavélico</div>
+                <div class="artista-cancion">Canserbero</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Seleccionar Maquiavélico">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <div class="cancion" data-titulo="A lo que voy" data-artista="Virlan García">
+            <span class="numero">8</span>
+            <img class="portada-cancion"
+                 src="https://blob.expreso.com.mx/images/uploads/2021/02/virlan-garcia.jpg"
+                 alt="Portada de A lo que voy" loading="lazy">
+            <div>
+                <div class="nombre-cancion">A lo que voy</div>
+                <div class="artista-cancion">Virlán García</div>
+            </div>
+            <button type="button" class="boton-cancion" aria-label="Seleccionar A lo que voy">
+                <i class="bi bi-play-circle"></i>
+            </button>
+        </div>
+
+        <p id="sinResultados" class="sin-resultados" hidden>
+            No se encontraron canciones.
+        </p>
+    </div>
+
+    <footer>Hecho con música y buen gusto · Playlist Favoritas</footer>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto" class="seccion-pagina">
+    <div class="contacto">
+        <h2 class="seccion-titulo mt-0">Contacto</h2>
+        <p class="text-secondary">Déjame una sugerencia musical.</p>
+
+        <form id="formContacto">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input id="nombre" name="nombre" class="form-control"
+                   type="text" placeholder="Escribe tu nombre" required>
+
+            <label for="correo" class="form-label">Correo electrónico</label>
+            <input id="correo" name="correo" class="form-control"
+                   type="email" placeholder="tucorreo@ejemplo.com" required>
+
+            <label for="mensaje" class="form-label">Tu sugerencia</label>
+            <textarea id="mensaje" name="mensaje" class="form-control"
+                      rows="4" placeholder="¿Qué canción debería agregar?"
+                      required></textarea>
+
+            <button class="btn btn-verde mt-3" type="submit">
+                <i class="bi bi-send-fill"></i> Enviar sugerencia
+            </button>
+
+            <p id="respuestaContacto" class="mt-3 mb-0" aria-live="polite"></p>
+        </form>
+    </div>
+
+    <footer>Hecho con música y buen gusto · Playlist Favoritas</footer>
+</section>
+
+</main>
+</div>
+
+<!-- REPRODUCTOR INFERIOR -->
+<div class="reproductor">
+    <div class="actual">
+        <img id="miniPortada" class="mini-portada"
+             src="https://placehold.co/100x100/263c31/ffffff?text=M"
+             alt="Portada de la canción seleccionada">
+
+        <div class="actual-texto">
+            <strong id="cancionActual">Elige una canción</strong>
+            <small id="artistaActual">Tu playlist</small>
+        </div>
+    </div>
+
+    <div class="controles">
+        <div>
+            <button type="button" id="anterior" aria-label="Canción anterior">
+                <i class="bi bi-skip-start-fill"></i>
+            </button>
+            <button type="button" id="reproducirActual" class="principal"
+                    aria-label="Mostrar reproductor de Spotify">
+                <i class="bi bi-play-fill"></i>
+            </button>
+            <button type="button" id="siguiente" aria-label="Siguiente canción">
+                <i class="bi bi-skip-end-fill"></i>
+            </button>
+        </div>
+
+        <div class="progreso-fila">
+            <span>Spotify</span>
+            <span>Usa los controles del reproductor</span>
+        </div>
+    </div>
+
+    <div class="volumen">
+        <i class="bi bi-spotify" style="color: #1ed760;"></i>
+        <span style="font-size: 12px; color: #b3b3b3;">Spotify</span>
+    </div>
+</div>
+
+<script>
+/* ENLACES DE LAS OCHO CANCIONES EN SPOTIFY */
+const cancionesSpotify = {
+    "Suena": {
+        id: "68x2TVlhCCwwBmszzLeCcQ",
+        artista: "Junior H y José Mejía"
+    },
+    "Las Noches": {
+        id: "0uQhDYHyoZe5DpncrPolb6",
+        artista: "Junior H"
+    },
+    "Chavalitas": {
+        id: "3qdeRGn9erK9sjs1kUtBys",
+        artista: "Fuerza Regida"
+    },
+    "Chaka": {
+        id: "3UZSZV80iBxSeEOpXgO4FD",
+        artista: "Fuerza Regida"
+    },
+    "Querer querernos": {
+        id: "6d3q0F9VNtdxQUTVlRcet6",
+        artista: "Canserbero"
+    },
+    "Sientes lo que siento": {
+        id: "4NPGGsTmm3JM4wOpWCT0T8",
+        artista: "Virlán García"
+    },
+    "Maquiavélico": {
+        id: "2RYOtMt9aj0p2mP5ofomFd",
+        artista: "Canserbero"
+    },
+    "A lo que voy": {
+        id: "63d3vBuVehI9hbqpCsoiP3",
+        artista: "Virlán García"
+    }
+};
+
+const canciones = [...document.querySelectorAll(".cancion")];
+const buscar = document.getElementById("buscar");
+const tituloLista = document.getElementById("tituloLista");
+
+const reproductorSpotify = document.getElementById("reproductorYouTube");
+const spotifyPlayer = document.getElementById("spotifyPlayer");
+const spotifyTitulo = document.getElementById("spotifyTitulo");
+const spotifySubtitulo = document.getElementById("spotifySubtitulo");
+
+let filtroActual = "Todos";
+let cancionSeleccionada = -1;
+
+/* CAMBIAR ENTRE SECCIONES */
+function mostrarSeccion(id) {
+    const seccion = document.getElementById(id);
+
+    if (!seccion || !seccion.classList.contains("seccion-pagina")) return;
+
+    document.querySelectorAll(".seccion-pagina").forEach(elemento => {
+        elemento.classList.toggle("activa", elemento.id === id);
+    });
+
+    document.querySelectorAll(".menu-enlace").forEach(enlace => {
+        enlace.classList.toggle("activo", enlace.dataset.seccion === id);
+    });
+
+    history.replaceState(null, "", "#" + id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* NAVEGACIÓN */
+document.querySelectorAll("[data-seccion]").forEach(enlace => {
+    enlace.addEventListener("click", evento => {
+        evento.preventDefault();
+        mostrarSeccion(enlace.dataset.seccion);
+    });
+});
+
+const seccionInicial = location.hash.substring(1);
+
+if (document.getElementById(seccionInicial)?.classList.contains("seccion-pagina")) {
+    mostrarSeccion(seccionInicial);
+}
+
+/* BUSCADOR Y FILTROS */
+function filtrarCanciones() {
+    const termino = buscar.value.trim().toLocaleLowerCase("es");
+    let resultados = 0;
+
+    canciones.forEach(cancion => {
+        const artista = cancion.dataset.artista;
+        const titulo = cancion.dataset.titulo;
+
+        const coincideArtista =
+            filtroActual === "Todos" || artista === filtroActual;
+
+        const texto = (titulo + " " + artista).toLocaleLowerCase("es");
+        const mostrar = coincideArtista && texto.includes(termino);
+
+        cancion.hidden = !mostrar;
+        if (mostrar) resultados++;
+    });
+
+    document.getElementById("sinResultados").hidden = resultados > 0;
+}
+
+document.querySelectorAll(".filtro-artista").forEach(boton => {
+    boton.addEventListener("click", () => {
+        filtroActual = boton.dataset.filtro;
+
+        tituloLista.textContent = filtroActual === "Todos"
+            ? "Todas las canciones favoritas"
+            : "Canciones de " + filtroActual;
+
+        document.querySelectorAll(".filtro-artista").forEach(otro => {
+            otro.classList.toggle("active", otro === boton);
+        });
+
+        document.querySelectorAll(".tarjeta-artista").forEach(tarjeta => {
+            tarjeta.classList.toggle(
+                "seleccionada",
+                tarjeta.dataset.artista === filtroActual
+            );
+        });
+
+        filtrarCanciones();
+    });
+});
+
+buscar.addEventListener("input", filtrarCanciones);
+
+document.getElementById("formBuscar").addEventListener("submit", evento => {
+    evento.preventDefault();
+    filtrarCanciones();
+});
+
+/* SELECCIONAR UNA CANCIÓN Y CARGAR SU SPOTIFY */
+function seleccionarCancion(cancion) {
+    if (!cancion) return;
+
+    const indice = canciones.indexOf(cancion);
+    if (indice < 0) return;
+
+    const titulo = cancion.dataset.titulo;
+    const datosSpotify = cancionesSpotify[titulo];
+
+    if (!datosSpotify) {
+        console.error("No se encontró el enlace de Spotify para:", titulo);
+        return;
+    }
+
+    cancionSeleccionada = indice;
+
+    /* Actualizar el reproductor inferior */
+    document.getElementById("cancionActual").textContent = titulo;
+
+    document.getElementById("artistaActual").textContent =
+        datosSpotify.artista;
+
+    const portada = cancion.querySelector(".portada-cancion");
+
+    document.getElementById("miniPortada").src = portada.src;
+    document.getElementById("miniPortada").alt = "Portada de " + titulo;
+
+    /* Marcar la canción elegida */
+    canciones.forEach(fila => {
+        const seleccionada = fila === cancion;
+
+        fila.style.background = seleccionada ? "#ffffff12" : "transparent";
+
+        fila.querySelector(".boton-cancion").classList.toggle(
+            "seleccionada",
+            seleccionada
+        );
+
+        fila.querySelector(".boton-cancion").innerHTML =
+            seleccionada
+                ? '<i class="bi bi-spotify"></i>'
+                : '<i class="bi bi-play-circle"></i>';
+    });
+
+    /* Actualizar el título y artista del reproductor Spotify */
+    spotifyTitulo.textContent = titulo;
+    spotifySubtitulo.textContent = datosSpotify.artista + " · Spotify";
+
+    /* Cambiar el enlace del reproductor solo si la canción es diferente */
+    const nuevoEnlace =
+        "https://open.spotify.com/embed/track/" +
+        datosSpotify.id +
+        "?utm_source=generator";
+
+    if (spotifyPlayer.dataset.trackId !== datosSpotify.id) {
+        spotifyPlayer.src = nuevoEnlace;
+        spotifyPlayer.dataset.trackId = datosSpotify.id;
+    }
+
+    /* Mostrar el reproductor y llevar a la sección de canciones */
+    reproductorSpotify.hidden = false;
+    mostrarSeccion("canciones");
+
+    reproductorSpotify.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+/* CONECTAR LOS OCHO BOTONES DE CANCIONES */
+canciones.forEach(cancion => {
+    cancion.querySelector(".boton-cancion").addEventListener("click", () => {
+        seleccionarCancion(cancion);
+    });
+});
+
+/* TARJETAS DE ARTISTAS */
+document.querySelectorAll(".tarjeta-artista").forEach(tarjeta => {
+    function activarTarjeta() {
+        filtroActual = tarjeta.dataset.artista;
+        buscar.value = "";
+        tituloLista.textContent = "Canciones de " + filtroActual;
+
+        document.querySelectorAll(".filtro-artista").forEach(boton => {
+            boton.classList.toggle(
+                "active",
+                boton.dataset.filtro === filtroActual
+            );
+        });
+
+        document.querySelectorAll(".tarjeta-artista").forEach(otra => {
+            otra.classList.toggle("seleccionada", otra === tarjeta);
+        });
+
+        filtrarCanciones();
+        mostrarSeccion("canciones");
+    }
+
+    tarjeta.addEventListener("click", evento => {
+        if (!evento.target.closest("button")) activarTarjeta();
+    });
+
+    tarjeta.querySelector("button").addEventListener("click", evento => {
+        evento.stopPropagation();
+        activarTarjeta();
+    });
+
+    tarjeta.addEventListener("keydown", evento => {
+        if (evento.key === "Enter" || evento.key === " ") {
+            evento.preventDefault();
+            activarTarjeta();
+        }
+    });
+});
+
+/* BOTÓN INFERIOR: MOSTRAR EL REPRODUCTOR */
+document.getElementById("reproducirActual").addEventListener("click", () => {
+    if (cancionSeleccionada < 0) {
+        seleccionarCancion(canciones[0]);
+        return;
+    }
+
+    reproductorSpotify.hidden = false;
+    mostrarSeccion("canciones");
+
+    reproductorSpotify.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+});
+
+/* CANCIÓN ANTERIOR */
+document.getElementById("anterior").addEventListener("click", () => {
+    const indice = cancionSeleccionada <= 0
+        ? canciones.length - 1
+        : cancionSeleccionada - 1;
+
+    seleccionarCancion(canciones[indice]);
+});
+
+/* CANCIÓN SIGUIENTE */
+document.getElementById("siguiente").addEventListener("click", () => {
+    const indice = cancionSeleccionada < 0
+        ? 0
+        : (cancionSeleccionada + 1) % canciones.length;
+
+    seleccionarCancion(canciones[indice]);
+});
+
+/* FORMULARIO DE CONTACTO */
+document.getElementById("formContacto").addEventListener("submit", evento => {
+    evento.preventDefault();
+
+    document.getElementById("respuestaContacto").textContent =
+        "¡Gracias! Tu sugerencia quedó registrada en esta página de demostración.";
+
+    evento.target.reset();
+});
+</script>
+
+</body>
+</html>
